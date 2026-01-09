@@ -1,0 +1,1384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gradient Lab — Free CSS Gradient Generator</title>
+    <meta name="description" content="Generate beautiful CSS gradients instantly. Copy code with one click. Free tool for designers and developers.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #0a0a0b;
+            --surface: #141416;
+            --surface-2: #1c1c1f;
+            --border: #2a2a2e;
+            --text: #fafafa;
+            --text-dim: #888;
+            --accent: #f0f0f0;
+        }
+
+        body {
+            font-family: 'Space Mono', monospace;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Grain overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+            opacity: 0.03;
+            pointer-events: none;
+            z-index: 1000;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Header */
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1.5rem 0;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 3rem;
+        }
+
+        .logo {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.5rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .logo-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #ff6b6b, #feca57);
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.8; }
+        }
+
+        .tagline {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        /* Main layout */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 1fr 380px;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Preview panel */
+        .preview-panel {
+            position: relative;
+            border-radius: 16px;
+            overflow: hidden;
+            aspect-ratio: 16/10;
+            border: 1px solid var(--border);
+        }
+
+        .gradient-preview {
+            width: 100%;
+            height: 100%;
+            transition: background 0.3s ease;
+        }
+
+        .preview-badge {
+            position: absolute;
+            bottom: 1rem;
+            left: 1rem;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(10px);
+            padding: 0.5rem 1rem;
+            border-radius: 100px;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+
+        /* Controls panel */
+        .controls-panel {
+            background: var(--surface);
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+
+        .control-label {
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-dim);
+        }
+
+        /* Color inputs */
+        .color-inputs {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .color-input-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .color-input-wrapper label {
+            font-size: 0.65rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-dim);
+        }
+
+        .color-picker-container {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 0.5rem;
+        }
+
+        input[type="color"] {
+            width: 36px;
+            height: 36px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background: none;
+        }
+
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: none;
+            border-radius: 6px;
+        }
+
+        .color-hex {
+            font-size: 0.85rem;
+            color: var(--text);
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        /* Angle control */
+        .angle-control {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .angle-dial {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            position: relative;
+            cursor: pointer;
+        }
+
+        .angle-dial::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 2px;
+            height: 45%;
+            background: var(--text);
+            border-radius: 2px;
+            transform-origin: bottom center;
+            transition: transform 0.1s ease;
+        }
+
+        .angle-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: 'Syne', sans-serif;
+        }
+
+        .angle-value span {
+            font-size: 0.9rem;
+            color: var(--text-dim);
+        }
+
+        input[type="range"] {
+            flex: 1;
+            height: 4px;
+            background: var(--surface-2);
+            border-radius: 2px;
+            appearance: none;
+            cursor: pointer;
+        }
+
+        input[type="range"]::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            background: var(--text);
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.15s ease;
+        }
+
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+        }
+
+        /* Gradient type */
+        .type-buttons {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .type-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .type-btn:hover {
+            border-color: var(--text-dim);
+        }
+
+        .type-btn.active {
+            background: var(--text);
+            color: var(--bg);
+            border-color: var(--text);
+        }
+
+        /* Action buttons */
+        .action-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            margin-top: auto;
+        }
+
+        .btn {
+            padding: 1rem;
+            border-radius: 8px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 1px solid transparent;
+            text-align: center;
+        }
+
+        .btn-primary {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255,255,255,0.2);
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--text);
+        }
+
+        /* Code output */
+        .code-output {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .code-header h3 {
+            font-family: 'Syne', sans-serif;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .copy-btn {
+            background: var(--surface-2);
+            border: 1px solid var(--border);
+            color: var(--text-dim);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .copy-btn:hover {
+            color: var(--text);
+            border-color: var(--text-dim);
+        }
+
+        .copy-btn.copied {
+            background: #22c55e;
+            border-color: #22c55e;
+            color: white;
+        }
+
+        .code-block {
+            padding: 1.5rem;
+            font-size: 0.85rem;
+            line-height: 1.8;
+            color: var(--text-dim);
+            overflow-x: auto;
+        }
+
+        .code-block .property {
+            color: #7dd3fc;
+        }
+
+        .code-block .value {
+            color: #fcd34d;
+        }
+
+        /* Presets */
+        .presets-section {
+            margin-top: 3rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .section-header h2 {
+            font-family: 'Syne', sans-serif;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .presets-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .preset-card {
+            aspect-ratio: 1;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            border: 2px solid transparent;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preset-card:hover {
+            transform: translateY(-4px);
+            border-color: var(--text);
+        }
+
+        .preset-card::after {
+            content: attr(data-name);
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 0.75rem;
+            background: linear-gradient(to top, rgba(0,0,0,0.8), transparent);
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Ad placeholder */
+        .ad-section {
+            margin-top: 4rem;
+            padding: 3rem;
+            background: var(--surface);
+            border: 1px dashed var(--border);
+            border-radius: 12px;
+            text-align: center;
+        }
+
+        .ad-section p {
+            color: var(--text-dim);
+            font-size: 0.8rem;
+        }
+
+        /* Footer */
+        footer {
+            margin-top: 4rem;
+            padding: 2rem 0;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 2rem;
+        }
+
+        .footer-links a {
+            color: var(--text-dim);
+            text-decoration: none;
+            font-size: 0.8rem;
+            transition: color 0.2s ease;
+        }
+
+        .footer-links a:hover {
+            color: var(--text);
+        }
+
+        .footer-copy {
+            font-size: 0.75rem;
+            color: var(--text-dim);
+        }
+
+        /* Toast notification */
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--text);
+            color: var(--bg);
+            padding: 1rem 2rem;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1001;
+        }
+
+        .toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+
+        /* Mode switcher */
+        .mode-switcher {
+            display: flex;
+            background: var(--surface-2);
+            border-radius: 8px;
+            padding: 4px;
+            margin-bottom: 1.5rem;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 0.75rem;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.7rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .mode-btn.active {
+            background: var(--text);
+            color: var(--bg);
+        }
+
+        .freeform-controls {
+            display: none;
+        }
+
+        .freeform-controls.active {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .simple-controls {
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        .simple-controls.hidden {
+            display: none;
+        }
+
+        /* Freeform preview with draggable points */
+        .freeform-preview {
+            position: relative;
+            cursor: crosshair;
+        }
+
+        .color-point {
+            position: absolute;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            border: 3px solid white;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.4), inset 0 0 0 2px rgba(0,0,0,0.2);
+            cursor: grab;
+            transform: translate(-50%, -50%);
+            transition: box-shadow 0.2s ease;
+            z-index: 10;
+        }
+
+        .color-point:hover {
+            box-shadow: 0 4px 16px rgba(0,0,0,0.5), inset 0 0 0 2px rgba(0,0,0,0.2);
+        }
+
+        .color-point.dragging {
+            cursor: grabbing;
+        }
+
+        .color-point.selected {
+            box-shadow: 0 0 0 3px var(--text), 0 4px 16px rgba(0,0,0,0.5);
+        }
+
+        /* Point list */
+        .points-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+
+        .point-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.5rem;
+            background: var(--surface-2);
+            border-radius: 8px;
+            border: 1px solid transparent;
+            transition: border-color 0.2s ease;
+        }
+
+        .point-item.selected {
+            border-color: var(--text);
+        }
+
+        .point-item input[type="color"] {
+            width: 32px;
+            height: 32px;
+        }
+
+        .point-item .point-label {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            flex: 1;
+        }
+
+        .point-item .point-coords {
+            font-size: 0.65rem;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+        }
+
+        .delete-point {
+            background: transparent;
+            border: none;
+            color: var(--text-dim);
+            cursor: pointer;
+            padding: 0.25rem;
+            font-size: 1rem;
+            line-height: 1;
+            transition: color 0.2s ease;
+        }
+
+        .delete-point:hover {
+            color: #ef4444;
+        }
+
+        .add-point-btn {
+            padding: 0.75rem;
+            background: var(--surface-2);
+            border: 1px dashed var(--border);
+            border-radius: 8px;
+            color: var(--text-dim);
+            font-family: 'Space Mono', monospace;
+            font-size: 0.75rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .add-point-btn:hover:not(:disabled) {
+            border-color: var(--text-dim);
+            color: var(--text);
+        }
+
+        .add-point-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        /* Export button */
+        .btn-export {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+        }
+
+        .btn-export:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        /* Freeform hint */
+        .freeform-hint {
+            font-size: 0.7rem;
+            color: var(--text-dim);
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--surface-2);
+            border-radius: 6px;
+            line-height: 1.5;
+        }
+
+        /* Hidden canvas for export */
+        #exportCanvas {
+            display: none;
+        }
+
+        /* Animations */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .main-grid, .presets-section, .code-output {
+            animation: fadeIn 0.6s ease forwards;
+        }
+
+        .presets-section { animation-delay: 0.1s; }
+        .code-output { animation-delay: 0.2s; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="logo">
+                <div class="logo-dot"></div>
+                Gradient Lab
+            </div>
+            <div class="tagline">Free CSS Gradients</div>
+        </header>
+
+        <div class="main-grid">
+            <div class="preview-panel">
+                <div class="gradient-preview" id="gradientPreview"></div>
+                <div class="preview-badge">Live Preview</div>
+            </div>
+
+            <div class="controls-panel">
+                <div class="mode-switcher">
+                    <button class="mode-btn active" data-mode="simple">Simple</button>
+                    <button class="mode-btn" data-mode="freeform">Freeform</button>
+                </div>
+
+                <!-- Simple Mode Controls -->
+                <div class="simple-controls" id="simpleControls">
+                    <div class="control-group">
+                        <div class="control-label">Colors</div>
+                        <div class="color-inputs">
+                            <div class="color-input-wrapper">
+                                <label>Start</label>
+                                <div class="color-picker-container">
+                                    <input type="color" id="color1" value="#ff6b6b">
+                                    <span class="color-hex" id="hex1">#ff6b6b</span>
+                                </div>
+                            </div>
+                            <div class="color-input-wrapper">
+                                <label>End</label>
+                                <div class="color-picker-container">
+                                    <input type="color" id="color2" value="#4ecdc4">
+                                    <span class="color-hex" id="hex2">#4ecdc4</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">Angle</div>
+                        <div class="angle-control">
+                            <div class="angle-dial" id="angleDial"></div>
+                            <div class="angle-value"><span id="angleValue">135</span><span>°</span></div>
+                            <input type="range" id="angleSlider" min="0" max="360" value="135">
+                        </div>
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">Type</div>
+                        <div class="type-buttons">
+                            <button class="type-btn active" data-type="linear">Linear</button>
+                            <button class="type-btn" data-type="radial">Radial</button>
+                            <button class="type-btn" data-type="conic">Conic</button>
+                        </div>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="randomBtn">✦ Random Gradient</button>
+                        <button class="btn btn-secondary" id="copyBtn">Copy CSS</button>
+                        <button class="btn btn-export" id="exportBtnSimple">↓ Export 4K Image</button>
+                    </div>
+                </div>
+
+                <!-- Freeform Mode Controls -->
+                <div class="freeform-controls" id="freeformControls">
+                    <div class="freeform-hint">
+                        Click on the preview to add points.<br>Drag points to reposition them.
+                    </div>
+
+                    <div class="control-group">
+                        <div class="control-label">Color Points (<span id="pointCount">2</span>/5)</div>
+                        <div class="points-list" id="pointsList"></div>
+                        <button class="add-point-btn" id="addPointBtn">+ Add Color Point</button>
+                    </div>
+
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="randomFreeformBtn">✦ Randomize</button>
+                        <button class="btn btn-secondary" id="copyFreeformBtn">Copy CSS</button>
+                        <button class="btn btn-export" id="exportBtnFreeform">↓ Export 4K Image</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="code-output">
+            <div class="code-header">
+                <h3>CSS Code</h3>
+                <button class="copy-btn" id="copyCodeBtn">Copy</button>
+            </div>
+            <pre class="code-block" id="codeBlock"></pre>
+        </div>
+
+        <section class="presets-section">
+            <div class="section-header">
+                <h2>Popular Presets</h2>
+            </div>
+            <div class="presets-grid" id="presetsGrid"></div>
+        </section>
+
+        <!-- Ad placeholder - replace with your ad code -->
+        <div class="ad-section">
+            <p>— Advertisement Space —</p>
+            <p style="margin-top: 0.5rem; font-size: 0.7rem;">Replace this with Google AdSense or affiliate links</p>
+        </div>
+
+        <footer>
+            <div class="footer-links">
+                <a href="#">About</a>
+                <a href="#">Contact</a>
+                <a href="#">Privacy</a>
+            </div>
+            <div class="footer-copy">© 2025 Gradient Lab. Free forever.</div>
+        </footer>
+    </div>
+
+    <div class="toast" id="toast">Copied to clipboard!</div>
+    <canvas id="exportCanvas"></canvas>
+
+    <script>
+        // ============ STATE ============
+        let currentMode = 'simple';
+        
+        // Simple mode state
+        let simpleState = {
+            color1: '#ff6b6b',
+            color2: '#4ecdc4',
+            angle: 135,
+            type: 'linear'
+        };
+
+        // Freeform mode state
+        let freeformPoints = [
+            { id: 1, x: 20, y: 20, color: '#ff6b6b' },
+            { id: 2, x: 80, y: 80, color: '#4ecdc4' }
+        ];
+        let nextPointId = 3;
+        let selectedPointId = null;
+        let draggingPoint = null;
+
+        // ============ PRESETS ============
+        const presets = [
+            { name: 'Sunset', color1: '#ff6b6b', color2: '#feca57', angle: 135 },
+            { name: 'Ocean', color1: '#667eea', color2: '#764ba2', angle: 135 },
+            { name: 'Mint', color1: '#11998e', color2: '#38ef7d', angle: 135 },
+            { name: 'Peach', color1: '#ee9ca7', color2: '#ffdde1', angle: 135 },
+            { name: 'Midnight', color1: '#232526', color2: '#414345', angle: 135 },
+            { name: 'Royal', color1: '#141e30', color2: '#243b55', angle: 135 },
+            { name: 'Coral', color1: '#ff9966', color2: '#ff5e62', angle: 135 },
+            { name: 'Lavender', color1: '#c471f5', color2: '#fa71cd', angle: 135 },
+            { name: 'Forest', color1: '#134e5e', color2: '#71b280', angle: 135 },
+            { name: 'Fire', color1: '#f12711', color2: '#f5af19', angle: 135 },
+            { name: 'Ice', color1: '#74ebd5', color2: '#acb6e5', angle: 135 },
+            { name: 'Night', color1: '#0f0c29', color2: '#302b63', angle: 135 },
+        ];
+
+        // ============ DOM ELEMENTS ============
+        const preview = document.getElementById('gradientPreview');
+        const previewPanel = document.querySelector('.preview-panel');
+        const color1Input = document.getElementById('color1');
+        const color2Input = document.getElementById('color2');
+        const hex1 = document.getElementById('hex1');
+        const hex2 = document.getElementById('hex2');
+        const angleSlider = document.getElementById('angleSlider');
+        const angleValue = document.getElementById('angleValue');
+        const angleDial = document.getElementById('angleDial');
+        const typeButtons = document.querySelectorAll('.type-btn');
+        const codeBlock = document.getElementById('codeBlock');
+        const randomBtn = document.getElementById('randomBtn');
+        const copyBtn = document.getElementById('copyBtn');
+        const copyCodeBtn = document.getElementById('copyCodeBtn');
+        const presetsGrid = document.getElementById('presetsGrid');
+        const toast = document.getElementById('toast');
+        const modeButtons = document.querySelectorAll('.mode-btn');
+        const simpleControls = document.getElementById('simpleControls');
+        const freeformControls = document.getElementById('freeformControls');
+        const pointsList = document.getElementById('pointsList');
+        const addPointBtn = document.getElementById('addPointBtn');
+        const pointCount = document.getElementById('pointCount');
+        const exportCanvas = document.getElementById('exportCanvas');
+
+        // ============ SIMPLE MODE FUNCTIONS ============
+        function getSimpleGradientCSS() {
+            const { color1, color2, angle, type } = simpleState;
+            if (type === 'linear') {
+                return `linear-gradient(${angle}deg, ${color1}, ${color2})`;
+            } else if (type === 'radial') {
+                return `radial-gradient(circle, ${color1}, ${color2})`;
+            } else {
+                return `conic-gradient(from ${angle}deg, ${color1}, ${color2}, ${color1})`;
+            }
+        }
+
+        function updateSimpleGradient() {
+            const gradient = getSimpleGradientCSS();
+            preview.style.background = gradient;
+            codeBlock.innerHTML = `<span class="property">background</span>: <span class="value">${gradient}</span>;`;
+            document.documentElement.style.setProperty('--dial-angle', `${simpleState.angle - 90}deg`);
+        }
+
+        // ============ FREEFORM MODE FUNCTIONS ============
+        function getFreeformGradientCSS() {
+            if (freeformPoints.length < 2) return '#333';
+            
+            // Create radial gradients for each point that blend together
+            const gradients = freeformPoints.map((point, index) => {
+                const size = 100 / freeformPoints.length * 2.5;
+                return `radial-gradient(circle at ${point.x}% ${point.y}%, ${point.color} 0%, transparent ${size}%)`;
+            });
+            
+            return gradients.join(', ');
+        }
+
+        function updateFreeformGradient() {
+            // Clear existing point elements
+            const existingPoints = preview.querySelectorAll('.color-point');
+            existingPoints.forEach(el => el.remove());
+            
+            // Create gradient
+            const gradient = getFreeformGradientCSS();
+            
+            // Set a base color (average or first color) behind the radial gradients
+            const baseColor = freeformPoints.length > 0 ? freeformPoints[freeformPoints.length - 1].color : '#333';
+            preview.style.background = `${gradient}, ${baseColor}`;
+            
+            // Add point markers
+            freeformPoints.forEach(point => {
+                const marker = document.createElement('div');
+                marker.className = 'color-point' + (point.id === selectedPointId ? ' selected' : '');
+                marker.style.left = `${point.x}%`;
+                marker.style.top = `${point.y}%`;
+                marker.style.backgroundColor = point.color;
+                marker.dataset.pointId = point.id;
+                
+                marker.addEventListener('mousedown', (e) => {
+                    e.stopPropagation();
+                    startDragging(point.id, e);
+                });
+                
+                marker.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    selectPoint(point.id);
+                });
+                
+                preview.appendChild(marker);
+            });
+            
+            // Update code block
+            codeBlock.innerHTML = `<span class="property">background</span>: <span class="value">${gradient}, ${baseColor}</span>;`;
+            
+            // Update points list
+            renderPointsList();
+        }
+
+        function renderPointsList() {
+            pointsList.innerHTML = '';
+            pointCount.textContent = freeformPoints.length;
+            addPointBtn.disabled = freeformPoints.length >= 5;
+            
+            freeformPoints.forEach((point, index) => {
+                const item = document.createElement('div');
+                item.className = 'point-item' + (point.id === selectedPointId ? ' selected' : '');
+                item.innerHTML = `
+                    <input type="color" value="${point.color}" data-point-id="${point.id}">
+                    <span class="point-label">Point ${index + 1}</span>
+                    <span class="point-coords">${Math.round(point.x)}%, ${Math.round(point.y)}%</span>
+                    ${freeformPoints.length > 2 ? `<button class="delete-point" data-point-id="${point.id}">×</button>` : ''}
+                `;
+                
+                item.querySelector('input[type="color"]').addEventListener('input', (e) => {
+                    const pointId = parseInt(e.target.dataset.pointId);
+                    const p = freeformPoints.find(pt => pt.id === pointId);
+                    if (p) {
+                        p.color = e.target.value;
+                        updateFreeformGradient();
+                    }
+                });
+                
+                const deleteBtn = item.querySelector('.delete-point');
+                if (deleteBtn) {
+                    deleteBtn.addEventListener('click', (e) => {
+                        const pointId = parseInt(e.target.dataset.pointId);
+                        freeformPoints = freeformPoints.filter(p => p.id !== pointId);
+                        if (selectedPointId === pointId) selectedPointId = null;
+                        updateFreeformGradient();
+                    });
+                }
+                
+                item.addEventListener('click', () => selectPoint(point.id));
+                
+                pointsList.appendChild(item);
+            });
+        }
+
+        function selectPoint(id) {
+            selectedPointId = id;
+            updateFreeformGradient();
+        }
+
+        function startDragging(pointId, e) {
+            draggingPoint = pointId;
+            const marker = preview.querySelector(`[data-point-id="${pointId}"]`);
+            if (marker) marker.classList.add('dragging');
+            
+            document.addEventListener('mousemove', handleDrag);
+            document.addEventListener('mouseup', stopDragging);
+        }
+
+        function handleDrag(e) {
+            if (!draggingPoint) return;
+            
+            const rect = preview.getBoundingClientRect();
+            let x = ((e.clientX - rect.left) / rect.width) * 100;
+            let y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            x = Math.max(0, Math.min(100, x));
+            y = Math.max(0, Math.min(100, y));
+            
+            const point = freeformPoints.find(p => p.id === draggingPoint);
+            if (point) {
+                point.x = x;
+                point.y = y;
+                updateFreeformGradient();
+            }
+        }
+
+        function stopDragging() {
+            if (draggingPoint) {
+                const marker = preview.querySelector(`[data-point-id="${draggingPoint}"]`);
+                if (marker) marker.classList.remove('dragging');
+            }
+            draggingPoint = null;
+            document.removeEventListener('mousemove', handleDrag);
+            document.removeEventListener('mouseup', stopDragging);
+        }
+
+        function addPointAtPosition(x, y) {
+            if (freeformPoints.length >= 5) return;
+            
+            const newPoint = {
+                id: nextPointId++,
+                x: x,
+                y: y,
+                color: randomColor()
+            };
+            freeformPoints.push(newPoint);
+            selectedPointId = newPoint.id;
+            updateFreeformGradient();
+        }
+
+        // ============ MODE SWITCHING ============
+        function switchMode(mode) {
+            currentMode = mode;
+            
+            modeButtons.forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.mode === mode);
+            });
+            
+            if (mode === 'simple') {
+                simpleControls.classList.remove('hidden');
+                freeformControls.classList.remove('active');
+                preview.classList.remove('freeform-preview');
+                // Remove point markers
+                const points = preview.querySelectorAll('.color-point');
+                points.forEach(el => el.remove());
+                updateSimpleGradient();
+            } else {
+                simpleControls.classList.add('hidden');
+                freeformControls.classList.add('active');
+                preview.classList.add('freeform-preview');
+                updateFreeformGradient();
+            }
+        }
+
+        // ============ EXPORT FUNCTION ============
+        function exportAs4K() {
+            const width = 3840;
+            const height = 2160;
+            
+            exportCanvas.width = width;
+            exportCanvas.height = height;
+            const ctx = exportCanvas.getContext('2d');
+            
+            if (currentMode === 'simple') {
+                const { color1, color2, angle, type } = simpleState;
+                
+                if (type === 'linear') {
+                    const angleRad = (angle - 90) * Math.PI / 180;
+                    const x1 = width / 2 - Math.cos(angleRad) * width;
+                    const y1 = height / 2 - Math.sin(angleRad) * height;
+                    const x2 = width / 2 + Math.cos(angleRad) * width;
+                    const y2 = height / 2 + Math.sin(angleRad) * height;
+                    
+                    const gradient = ctx.createLinearGradient(x1, y1, x2, y2);
+                    gradient.addColorStop(0, color1);
+                    gradient.addColorStop(1, color2);
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                } else if (type === 'radial') {
+                    const gradient = ctx.createRadialGradient(width/2, height/2, 0, width/2, height/2, Math.max(width, height)/2);
+                    gradient.addColorStop(0, color1);
+                    gradient.addColorStop(1, color2);
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                } else {
+                    // Conic - approximate with multiple segments
+                    const segments = 360;
+                    const centerX = width / 2;
+                    const centerY = height / 2;
+                    const radius = Math.max(width, height);
+                    
+                    for (let i = 0; i < segments; i++) {
+                        const startAngle = ((i + angle) / 180) * Math.PI;
+                        const endAngle = ((i + 1 + angle) / 180) * Math.PI;
+                        const ratio = i / segments;
+                        
+                        ctx.beginPath();
+                        ctx.moveTo(centerX, centerY);
+                        ctx.arc(centerX, centerY, radius, startAngle, endAngle);
+                        ctx.closePath();
+                        ctx.fillStyle = interpolateColor(color1, color2, ratio < 0.5 ? ratio * 2 : 2 - ratio * 2);
+                        ctx.fill();
+                    }
+                }
+            } else {
+                // Freeform - draw base color first
+                const baseColor = freeformPoints[freeformPoints.length - 1]?.color || '#333';
+                ctx.fillStyle = baseColor;
+                ctx.fillRect(0, 0, width, height);
+                
+                // Draw radial gradients for each point
+                freeformPoints.forEach(point => {
+                    const x = (point.x / 100) * width;
+                    const y = (point.y / 100) * height;
+                    const radius = Math.max(width, height) / freeformPoints.length * 1.2;
+                    
+                    const gradient = ctx.createRadialGradient(x, y, 0, x, y, radius);
+                    gradient.addColorStop(0, point.color);
+                    gradient.addColorStop(1, hexToRgba(point.color, 0));
+                    
+                    ctx.fillStyle = gradient;
+                    ctx.fillRect(0, 0, width, height);
+                });
+            }
+            
+            // Download
+            const link = document.createElement('a');
+            link.download = 'gradient-4k.png';
+            link.href = exportCanvas.toDataURL('image/png');
+            link.click();
+            
+            showToast('4K image exported!');
+        }
+
+        function interpolateColor(color1, color2, ratio) {
+            const r1 = parseInt(color1.slice(1, 3), 16);
+            const g1 = parseInt(color1.slice(3, 5), 16);
+            const b1 = parseInt(color1.slice(5, 7), 16);
+            const r2 = parseInt(color2.slice(1, 3), 16);
+            const g2 = parseInt(color2.slice(3, 5), 16);
+            const b2 = parseInt(color2.slice(5, 7), 16);
+            
+            const r = Math.round(r1 + (r2 - r1) * ratio);
+            const g = Math.round(g1 + (g2 - g1) * ratio);
+            const b = Math.round(b1 + (b2 - b1) * ratio);
+            
+            return `rgb(${r}, ${g}, ${b})`;
+        }
+
+        function hexToRgba(hex, alpha) {
+            const r = parseInt(hex.slice(1, 3), 16);
+            const g = parseInt(hex.slice(3, 5), 16);
+            const b = parseInt(hex.slice(5, 7), 16);
+            return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+        }
+
+        // ============ UTILITY FUNCTIONS ============
+        function randomColor() {
+            return '#' + Math.floor(Math.random()*16777215).toString(16).padStart(6, '0');
+        }
+
+        function showToast(message = 'Copied to clipboard!') {
+            toast.textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => toast.classList.remove('show'), 2000);
+        }
+
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                showToast();
+            });
+        }
+
+        // ============ EVENT LISTENERS ============
+        
+        // Mode switching
+        modeButtons.forEach(btn => {
+            btn.addEventListener('click', () => switchMode(btn.dataset.mode));
+        });
+
+        // Simple mode controls
+        color1Input.addEventListener('input', (e) => {
+            simpleState.color1 = e.target.value;
+            hex1.textContent = e.target.value;
+            updateSimpleGradient();
+        });
+
+        color2Input.addEventListener('input', (e) => {
+            simpleState.color2 = e.target.value;
+            hex2.textContent = e.target.value;
+            updateSimpleGradient();
+        });
+
+        angleSlider.addEventListener('input', (e) => {
+            simpleState.angle = parseInt(e.target.value);
+            angleValue.textContent = simpleState.angle;
+            updateSimpleGradient();
+        });
+
+        typeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                typeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                simpleState.type = btn.dataset.type;
+                updateSimpleGradient();
+            });
+        });
+
+        randomBtn.addEventListener('click', () => {
+            simpleState.color1 = randomColor();
+            simpleState.color2 = randomColor();
+            simpleState.angle = Math.floor(Math.random() * 360);
+            
+            color1Input.value = simpleState.color1;
+            color2Input.value = simpleState.color2;
+            hex1.textContent = simpleState.color1;
+            hex2.textContent = simpleState.color2;
+            angleSlider.value = simpleState.angle;
+            angleValue.textContent = simpleState.angle;
+            
+            updateSimpleGradient();
+        });
+
+        copyBtn.addEventListener('click', () => {
+            copyToClipboard(`background: ${getSimpleGradientCSS()};`);
+        });
+
+        // Freeform mode controls
+        preview.addEventListener('click', (e) => {
+            if (currentMode !== 'freeform') return;
+            if (e.target.classList.contains('color-point')) return;
+            
+            const rect = preview.getBoundingClientRect();
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            
+            addPointAtPosition(x, y);
+        });
+
+        addPointBtn.addEventListener('click', () => {
+            // Add at random position
+            addPointAtPosition(20 + Math.random() * 60, 20 + Math.random() * 60);
+        });
+
+        document.getElementById('randomFreeformBtn').addEventListener('click', () => {
+            freeformPoints = freeformPoints.map(p => ({
+                ...p,
+                x: 10 + Math.random() * 80,
+                y: 10 + Math.random() * 80,
+                color: randomColor()
+            }));
+            updateFreeformGradient();
+        });
+
+        document.getElementById('copyFreeformBtn').addEventListener('click', () => {
+            const baseColor = freeformPoints[freeformPoints.length - 1]?.color || '#333';
+            copyToClipboard(`background: ${getFreeformGradientCSS()}, ${baseColor};`);
+        });
+
+        // Export buttons
+        document.getElementById('exportBtnSimple').addEventListener('click', exportAs4K);
+        document.getElementById('exportBtnFreeform').addEventListener('click', exportAs4K);
+
+        // Code copy button
+        copyCodeBtn.addEventListener('click', () => {
+            const css = currentMode === 'simple' 
+                ? `background: ${getSimpleGradientCSS()};`
+                : `background: ${getFreeformGradientCSS()}, ${freeformPoints[freeformPoints.length - 1]?.color || '#333'};`;
+            copyToClipboard(css);
+            copyCodeBtn.textContent = 'Copied!';
+            copyCodeBtn.classList.add('copied');
+            setTimeout(() => {
+                copyCodeBtn.textContent = 'Copy';
+                copyCodeBtn.classList.remove('copied');
+            }, 2000);
+        });
+
+        // Presets
+        presets.forEach(preset => {
+            const card = document.createElement('div');
+            card.className = 'preset-card';
+            card.dataset.name = preset.name;
+            card.style.background = `linear-gradient(${preset.angle}deg, ${preset.color1}, ${preset.color2})`;
+            
+            card.addEventListener('click', () => {
+                // Switch to simple mode
+                switchMode('simple');
+                
+                simpleState.color1 = preset.color1;
+                simpleState.color2 = preset.color2;
+                simpleState.angle = preset.angle;
+                simpleState.type = 'linear';
+                
+                color1Input.value = preset.color1;
+                color2Input.value = preset.color2;
+                hex1.textContent = preset.color1;
+                hex2.textContent = preset.color2;
+                angleSlider.value = preset.angle;
+                angleValue.textContent = preset.angle;
+                
+                typeButtons.forEach(b => b.classList.remove('active'));
+                typeButtons[0].classList.add('active');
+                
+                updateSimpleGradient();
+            });
+            
+            presetsGrid.appendChild(card);
+        });
+
+        // Dial rotation style
+        const styleSheet = document.createElement('style');
+        styleSheet.textContent = `
+            .angle-dial::after {
+                transform: translateX(-50%) rotate(var(--dial-angle, 45deg));
+            }
+        `;
+        document.head.appendChild(styleSheet);
+
+        // ============ INITIAL RENDER ============
+        updateSimpleGradient();
+    </script>
+</body>
+</html>
